@@ -1,39 +1,25 @@
 package server
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
+
+	"github.com/justinas/alice"
+	"github.com/rs/cors"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
 
 	mux := http.NewServeMux()
+	// c := cors.Default()
+	standard := alice.New(cors.Default().Handler)
+
 	mux.HandleFunc("/", s.HelloWorldHandler)
+	mux.HandleFunc("POST /sheet", s.addSheet)
 
 	mux.HandleFunc("/health", s.healthHandler)
 
-	return mux
-}
+	root := http.NewServeMux()
+	root.Handle("/api/", http.StripPrefix("/api", mux))
 
-func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
-	}
-
-	_, _ = w.Write(jsonResp)
-}
-
-func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
-	jsonResp, err := json.Marshal(s.db.Health())
-
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
-	}
-
-	_, _ = w.Write(jsonResp)
+	return standard.Then(root)
 }

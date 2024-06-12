@@ -5,7 +5,7 @@ all: build
 
 build:
 	@echo "Building..."
-	
+
 	@go build -o main cmd/api/main.go
 
 # Run the application
@@ -56,5 +56,17 @@ watch:
 	        exit 1; \
 	    fi; \
 	fi
+
+migrateup:
+	migrate -path internal/database/migrations -database "postgresql://root:secret@localhost:5432/smartsheets?sslmode=disable" -verbose up
+
+migrateupone:
+	migrate -path internal/database/migrations -database "postgresql://root:secret@localhost:5432/smartsheets?sslmode=disable" -verbose up 1
+
+migratedown:
+	migrate -path internal/database/migrations -database "postgresql://root:secret@localhost:5432/smartsheets?sslmode=disable" -verbose down
+
+migratedownone:
+	migrate -path internal/database/migrations -database "postgresql://root:secret@localhost:5432/smartsheets?sslmode=disable" -verbose down 1
 
 .PHONY: all build run test clean
