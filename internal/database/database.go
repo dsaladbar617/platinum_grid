@@ -18,6 +18,9 @@ type Service interface {
 	// Health returns a map of health status information.
 	// The keys and values in the map are service-specific.
 	Health() map[string]string
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Query(query string, args ...interface{}) (*sql.Rows, error)
 
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
@@ -51,6 +54,18 @@ func New() Service {
 		db: db,
 	}
 	return dbInstance
+}
+
+func (s *service) Exec(query string, args ...interface{}) (sql.Result, error) {
+	return s.db.Exec(query, args...)
+}
+
+func (s *service) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	return s.db.Query(query, args...)
+}
+
+func (s *service) QueryRow(query string, args ...interface{}) *sql.Row {
+	return s.db.QueryRow(query, args...)
 }
 
 // Health checks the health of the database connection by pinging the database.

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"platinum_grid/internal/database"
 	"platinum_grid/internal/models"
 	"platinum_grid/internal/server"
 )
@@ -18,9 +17,9 @@ func main() {
 	fmt.Println("Starting server...")
 	err := server.ListenAndServe()
 
-	app := &application{
-		users: &models.SheetModel{DB: dbInstance,}
-	}
+	// app := &application{
+	// 	users: &models.SheetModel{DB: dbInstance,}
+	// }
 
 	if err != nil {
 		panic(fmt.Sprintf("cannot start server: %s", err))

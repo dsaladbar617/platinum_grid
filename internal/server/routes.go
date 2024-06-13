@@ -15,6 +15,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	mux.HandleFunc("/", s.HelloWorldHandler)
 	mux.HandleFunc("POST /sheet", s.addSheet)
+	mux.HandleFunc("PUT /edit_sheet/{id}", s.updateSheet)
+	mux.HandleFunc("GET /get_sheet/{id}", s.getSheetByID)
 
 	mux.HandleFunc("/health", s.healthHandler)
 
