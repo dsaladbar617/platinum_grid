@@ -2,9 +2,12 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/lib/pq"
 )
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
@@ -133,4 +136,46 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, _ = w.Write(jsonResp)
+}
+
+type User struct {
+	UserID  string `json:"firebase_uuid"`
+	Name    string `json:"name"`
+	Picture string `json:"picture"`
+	Email   string `json:"email"`
+}
+
+func (s *Server) addUser(w http.ResponseWriter, r *http.Request) {
+	var u User
+
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp := make(map[string]string)
+
+	stmt := `INSERT INTO users (firebase_uuid, name, picture, email) VALUES ($1, $2, $3, $4) RETURNING *;`
+
+	_, err = s.db.Exec(stmt, u.UserID, u.Name, u.Picture, u.Email)
+	if err != nil {
+		if pgErr, ok := err.(*pq.Error); ok {
+			if pgErr.Code == "23505" {
+				w.WriteHeader(http.StatusForbidden)
+				resp["message"] = "User already exists"
+				json.NewEncoder(w).Encode(resp)
+				// http.Error(w, err.Error(), http.StatusForbidden)
+				return
+			}
+		}
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp["message"] = fmt.Sprintf("%s added successfully", u.Name)
+
+	json.NewEncoder(w).Encode(resp)
+
 }

@@ -9,6 +9,7 @@ CREATE TABLE "users" (
     "id" bigserial PRIMARY KEY,
     "name" VARCHAR(255) NOT NULL,
     "man_number" INTEGER,
+    "firebase_uuid" VARCHAR NOT NULL UNIQUE,
     "picture" VARCHAR,
     "email" VARCHAR(255) NOT NULL
 );
